@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
 
-def train_test_validate_split(dataset, train_split: float, test_split: float, validate_split:float=None, shuffle=True, random_state=None):
+def train_test_validate_split(X: np.ndarray, y: np.ndarray, train_split: float, test_split: float, validate_split:float=None, shuffle=True, random_state=None):
     '''
     This function receives a dataset as input and will output a train data set, validation data set (optional) and a test data set
 
     Parameters:
-        dataset : array-like or pd.DataFrame
-            The dataset to be split.
+        X : array-like
+            The input to be split.
+        y : array-like 
+            the output to be split
         train_split : float
             Fraction of data to allocate for the training set.
         test_split : float
@@ -26,8 +28,7 @@ def train_test_validate_split(dataset, train_split: float, test_split: float, va
             tuple: (train_set, test_set)
     '''
 
-    dataset = np.array(dataset)
-    n = len(dataset)
+    n = len(X)
 
     # Seed
     if random_state is not None:
@@ -56,19 +57,19 @@ def train_test_validate_split(dataset, train_split: float, test_split: float, va
         val_split_idx = int(validate_split*n + tr_split_idx)
 
         # Split
-        train_set = dataset[indices[:tr_split_idx]]
-        val_set = dataset[indices[tr_split_idx:val_split_idx]]
-        test_set = dataset[indices[val_split_idx:]]
+        X_train_set, y_train_set = X[indices[:tr_split_idx]], y[indices[:tr_split_idx]]
+        X_val_set, y_val_set = X[indices[tr_split_idx:val_split_idx]], y[indices[tr_split_idx:val_split_idx]]
+        X_test_set, y_test_set = X[indices[val_split_idx:]], y[indices[val_split_idx:]]
 
-        return train_set, val_set, test_set
+        return X_train_set, y_train_set, X_val_set, y_val_set, X_test_set, y_test_set
     
     else:
 
         # Split
-        train_set = dataset[indices[:tr_split_idx]]
-        test_set = dataset[indices[tr_split_idx:]]
+        X_train_set, y_train_set = X[indices[:tr_split_idx]], y[indices[:tr_split_idx]]
+        X_test_set, y_test_set = X[indices[tr_split_idx:]], y[indices[tr_split_idx:]]
 
-        return train_set, test_set
+        return X_train_set, y_train_set, X_test_set, y_test_set
 
     
 def normalize(data, axis = 0, handle_nan='raise', handle_zero='raise'):

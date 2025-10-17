@@ -84,9 +84,6 @@ class LinearRegression:
 
         return self.loss(y, y_pred)
     
-
-
-    
     def backward(self, X, y, y_pred):
 
         '''
@@ -106,9 +103,8 @@ class LinearRegression:
         db = np.sum(dldy)
 
         return dW, db
-    
 
-    def fit(self, X, y, x_val=None, y_val=None, plot_cost=True):
+    def fit(self, x_train, y_train, x_val=None, y_val=None, plot_cost=True):
 
         '''
         Fit the linear regression model to the training data.
@@ -127,24 +123,24 @@ class LinearRegression:
             Plotly line chart showing cost vs. iteration (if plot_cost is True).
         '''
 
-        assert isinstance(X, np.ndarray), "X must be a NumPy array"
-        assert isinstance(y, np.ndarray), "y must be a NumPy array"
-        assert X.shape[0] == y.shape[0], "X and y must have the same number of samples"
+        assert isinstance(x_train, np.ndarray), "X must be a NumPy array"
+        assert isinstance(y_train, np.ndarray), "y must be a NumPy array"
+        assert x_train.shape[0] == y_train.shape[0], "X and y must have the same number of samples"
         assert self.iterations > 0, "Iterations must be greater than 0"
 
-        self.X = X
-        self.y = y
+        self.X = x_train
+        self.y = y_train
 
-        w_shape = (X.shape[1],1)
+        w_shape = (x_train.shape[1],)
         self.initialize_parameters(w_shape, self.init_mode)
         
         costs = []
         validation_costs = []
 
         for i in range(self.iterations):
-            predictions = self.forward(X)
-            cost = self.compute_cost(y, predictions)
-            dW, db = self.backward(X, y, predictions)
+            predictions = self.forward(x_train)
+            cost = self.compute_cost(y_train, predictions)
+            dW, db = self.backward(x_train, y_train, predictions)
             self.optimizer.update(self, dW, db)
 
             if x_val is None:

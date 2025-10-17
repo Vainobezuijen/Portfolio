@@ -82,3 +82,36 @@ class RegressionMetrics:
         ss_residual = np.sum((y - y_pred) ** 2)
         r2 = 1 - (ss_residual / ss_total)
         return r2
+    
+class ClassificationMetrics:
+
+    @staticmethod
+    def accuracy(y_test:np.ndarray, y_pred:np.ndarray) -> float:
+        """
+        Calculate the accuracy for a classification task.
+
+        Args:
+            y_true (numpy.ndarray): The true target values.
+            y_pred (numpy.ndarray): The predicted target values.
+
+        Returns:
+            float: Accuracy value
+        """
+        return np.sum(y_test == y_pred) / len(y_test)
+    
+    @staticmethod
+    def precision(y_test:np.ndarray, y_pred:np.ndarray) -> float:
+        """
+        Calculate the recall for a classification task. Recall measures 
+        out of all the times the model predicted "positive," 
+        how many were actually correct?
+
+        Args:
+            y_true (numpy.ndarray): The true target values.
+            y_pred (numpy.ndarray): The predicted target values.
+
+        Returns:
+            float: Accuracy value
+        """
+        t_p = y_test == 1
+        return np.sum(y_pred)
