@@ -36,9 +36,7 @@ class DecisionTree:
         self.max_depth=max_depth
         self.n_features=n_features
         self.root=None
-        
         self.random_state = random_state
-        self.tree = None
         self.task_type = task_type # Classification or Regression
         self.criterion = criterion
 
@@ -52,7 +50,9 @@ class DecisionTree:
 
     def _grow_tree(self, X: np.ndarray, y: np.ndarray, depth=0):
         '''
-        
+        This function grows the tree recursively. It starts at the root, decides on how to split the data and creates child nodes. Then it does the same for those child nodes.
+        The split is based on the highest information gain. The features to split on are chosen randomly, introducing randomness in the algorithm
+        Each feature is checked for the highest information gain.
         '''
         n_samples, n_feats = X.shape
         n_labels = len(np.unique(y))
@@ -67,14 +67,14 @@ class DecisionTree:
 
         # Create child nodes
         left_idxs, right_idxs = self._split(X[:, best_feature], best_threshold)
-        left = self._grow_tree((X[left_idxs, :], y[left_idxs]), depth+1)
-        right = self._grow_tree((X[right_idxs, :], y[right_idxs]), depth+1)
+        left = self._grow_tree(X[left_idxs, :], y[left_idxs], depth + 1)
+        right = self._grow_tree(X[right_idxs, :], y[right_idxs], depth + 1)
         return Node(best_feature, best_threshold, left, right)
 
-    def _most_common_label(self, y: np.ndarray):
-      # __________________________________ # 
+    def _most_common_label(self, y: np.array):
+      # ___________________________________ # 
         counter = Counter(y) # CREATE
-      # __________________________________ #
+      # ___________________________________ #
         return counter.most_common(1)[0][0]
     
     def _best_split(self, X: np.ndarray, y: np.ndarray, feat_idxs):
@@ -83,8 +83,9 @@ class DecisionTree:
 
         for feat_idx in feat_idxs:
             X_column = X[:, feat_idx]
+            print(X_column)
             thresholds = np.unique(X_column)
-
+            print(thresholds)
             for threshold in thresholds:
                 # calculate information gain
                 gain = self._information_gain(X_column, y, threshold)
@@ -118,22 +119,25 @@ class DecisionTree:
 
     def _split(self, X_column, split_threshold):
         left_idxs = np.argwhere(X_column <= split_threshold).flatten()
-        right_idxs = np.argwhere(X_column >= split_threshold).flatten()
+        right_idxs = np.argwhere(X_column > split_threshold).flatten()
         return left_idxs, right_idxs
 
     def _entropy(self, y):
+        y = np.asarray(y).flatten()
+        if y.dtype != int:
+            y = y.astype(int)  # convert labels like 0.0, 1.0 → 0, 1
         hist = np.bincount(y)
         p_s = hist / len(y)
-        return np.sum([p * np.log(p) for p in p_s if p > 0])
-        
+        return -np.sum([p * np.log2(p) for p in p_s if p > 0]) 
+           
     def predict(self, X:np.ndarray):
         '''
-        
+        Predicting works by traversing the tree, it follows the decisions of the nodes recursively until it is at a leaf node and then it returns the leaf value.
         '''
-        return np.array([self.traverse_tree(x) for x in X])
+        return np.array([self._traverse_tree(x, self.root) for x in X])
     
     def _traverse_tree(self, x: np.ndarray , node: Node):
-        if node._is_leaf_node():
+        if node.is_leaf_node():
             return node.value
         
         if x[node.feature] <= node.threshold:
