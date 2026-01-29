@@ -102,16 +102,53 @@ class ClassificationMetrics:
     @staticmethod
     def precision(y_test:np.ndarray, y_pred:np.ndarray) -> float:
         """
-        Calculate the recall for a classification task. Recall measures 
-        out of all the times the model predicted "positive," 
-        how many were actually correct?
+        Calculate the precision for a classification task.
 
         Args:
             y_true (numpy.ndarray): The true target values.
             y_pred (numpy.ndarray): The predicted target values.
 
         Returns:
-            float: Accuracy value
+            float: Precision value
         """
-        t_p = y_test == 1
-        return np.sum(y_pred)
+        y_test, y_pred = np.asarray(y_test), np.asarray(y_pred)
+        if y_test.shape != y_pred.shape:
+            raise ValueError("Shapes of y_test and y_pred must match.")
+        tp = np.sum((y_test == 1) & (y_pred == 1))
+        fp = np.sum((y_test == 0) & (y_pred == 1))
+        return tp / (tp + fp) if (tp + fp) > 0 else 0.0
+
+    @staticmethod
+    def recall(y_test:np.ndarray, y_pred:np.ndarray) -> float:
+        """
+        Calculate the recall for a classification task.
+
+        Args:
+            y_true (numpy.ndarray): The true target values.
+            y_pred (numpy.ndarray): The predicted target values.
+
+        Returns:
+            float: Recall value
+        """
+        y_test, y_pred = np.asarray(y_test), np.asarray(y_pred)
+        if y_test.shape != y_pred.shape:
+            raise ValueError("Shapes of y_test and y_pred must match.")
+        tp = np.sum((y_test == 1) & (y_pred == 1))
+        fn = np.sum((y_test == 1) & (y_pred == 0))
+        return tp / (tp + fn) if (tp + fn) > 0 else 0.0
+
+    @staticmethod
+    def f1_score(y_test:np.ndarray, y_pred:np.ndarray) -> float:
+        """
+        Calculate the F1 score for a classification task.
+
+        Args:
+            y_true (numpy.ndarray): The true target values.
+            y_pred (numpy.ndarray): The predicted target values.
+
+        Returns:
+            float: F1 score value
+        """
+        precision = ClassificationMetrics.precision(y_test, y_pred)
+        recall = ClassificationMetrics.recall(y_test, y_pred)
+        return (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
